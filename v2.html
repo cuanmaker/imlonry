@@ -373,14 +373,12 @@
     <aside id="app-sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-72 lg:w-64 bg-slate-900 text-slate-200 flex flex-col flex-shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 h-screen shadow-2xl lg:shadow-none">
       <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
         <div class="flex items-center space-x-2">
-          <!-- Pembungkus logo bersih tanpa background warna/shadow -->
           <div class="w-8 h-8 flex items-center justify-center text-2xl overflow-hidden bg-transparent shadow-none" id="sidebar-icon">🧼</div>
           <span class="text-lg font-bold text-white logo-font" id="sidebar-brand">iMersLonry</span>
         </div>
         <div class="flex items-center gap-3">
           <span id="online-indicator" class="w-2.5 h-2.5 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.8)]" title="Online Sync Active"></span>
-          <!-- Tombol Tutup Khusus Mobile -->
-          <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-white p-1">✕</button>
+          <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-white p-1 text-xl">✕</button>
         </div>
       </div>
 
@@ -1316,8 +1314,8 @@
       settings: { 
         store_name: "iMersLonry", store_address: "Jl. Kelembutan Premium No. 123", store_phone: "081234567890", receipt_footer: "Terima kasih telah mempercayakan pakaian Anda di iMersLonry!", 
         wa_provider: "none", wa_api_key: "", wa_sender: "", 
-        wa_template_new: "Halo {nama_pelanggan},\nPesanan laundry Anda telah kami terima di {nama_cabang}.\n\n🧾 *Nota:* {no_nota}\n📦 *Layanan:* {nama_paket}\n💸 *Total:* {total_tagihan}\n💳 *Status:* {status_bayar}\n⏳ *Estimasi Selesai:* {estimasi_selesai}\n\nLacak status cucian & e-Nota Anda di sini:\n👉 {link_pelacakan}\n\nTerima kasih!",
-        wa_template_status: "Update dari {nama_cabang}!\n\nHalo {nama_pelanggan},\nCucian Anda dengan nota {no_nota} saat ini berstatus: *{status_cucian}*.\n\nSisa Tagihan: {sisa_tagihan}\n\nCek e-Nota selengkapnya:\n👉 {link_pelacakan}",
+        wa_template_new: "Halo {nama_pelanggan},\nPesanan laundry Anda telah kami terima di {nama_cabang}.\n\n🧾 *Nota:* {no_nota}\n📦 *Layanan:* {nama_paket}\n💸 *Total Tagihan:* {total_tagihan}\n🎁 *Diskon:* {diskon}\n💳 *Status Bayar:* {status_bayar}\n📉 *Sisa Tagihan:* {sisa_tagihan}\n⏳ *Estimasi Selesai:* {estimasi_selesai}\n\nLacak status cucian & e-Nota Anda di sini:\n👉 {link_pelacakan}\n\nTerima kasih!",
+        wa_template_status: "Update dari {nama_cabang}!\n\nHalo {nama_pelanggan},\nCucian Anda dengan nota {no_nota} saat ini berstatus: *{status_cucian}*.\n\nSisa Tagihan Pembayaran: {sisa_tagihan}\n\nCek e-Nota selengkapnya di sini:\n👉 {link_pelacakan}",
         landing_status: "ON", brand_icon: "🧼", hero_headline: "Sistem POS Kasir & Portal Pelanggan Laundry", hero_subheadline: "Dilengkapi Notifikasi WhatsApp Gateway otomatis, sinkronisasi cloud dengan Google Sheets, dan Portal Khusus agar pelanggan bisa melacak cuciannya sendiri!", 
         hero_bg_type: "gradient", hero_bg_color1: "#fb923c", hero_bg_color2: "#ea580c", hero_bg_color3: "#c2410c", hero_title_color: "#ffffff",
         feat_title: "Layanan Premium Kami", feat_sub: "Perawatan berkualitas tinggi untuk setiap jenis pakaian. Lembut pada bahan, tangguh pada noda.", feat1_icon: "🧺", feat1_title: "Cuci & Setrika", feat1_desc: "Layanan harian standar. Dicuci bersih, dilipat rapi, dan wangi segar tahan lama.", feat2_icon: "👔", feat2_title: "Dry Cleaning", feat2_desc: "Pembersihan eksklusif untuk kain mewah, jas formal, dan pakaian seremonial.", feat3_icon: "🛏️", feat3_title: "Bed Cover & Selimut", feat3_desc: "Pencucian ekstraksi dalam untuk menghilangkan tungau, debu, dan kotoran membandel.", feat4_icon: "👟", feat4_title: "Spa Sepatu", feat4_desc: "Perawatan bahan suede, kanvas, atau kulit. Kembalikan sepatu favorit Anda seperti baru.",

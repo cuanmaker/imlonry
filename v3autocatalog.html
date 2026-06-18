@@ -1,0 +1,526 @@
+/**
+ * imlaundry POS Cashier - Google Apps Script Core Backend
+ * Menggunakan spreadsheet aktif (getActiveSpreadsheet) secara dinamis.
+ */
+
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  ui.createMenu('🧼 imlaundry POS')
+    .addItem('⚙️ Inisialisasi Database & Data Dummy', 'setupDatabaseAndDummy')
+    .addToUi();
+}
+
+function setupDatabaseAndDummy() {
+  const ui = SpreadsheetApp.getUi();
+  const db = SpreadsheetApp.getActiveSpreadsheet();
+  
+  const sheetsConfig = {
+    "settings": ["key", "value"],
+    "outlets": ["id", "name", "address", "phone", "status", "created_at"],
+    "users": ["id", "name", "username", "password", "role", "outlet_id", "status", "created_at"],
+    "customers": ["id", "name", "phone", "address", "outlet_id", "created_at"],
+    "services": ["id", "category", "name", "description", "type", "price", "estimate_days", "outlet_id", "status", "created_at"],
+    "transactions": ["id", "invoice", "customer_id", "outlet_id", "cashier_id", "status_order", "status_payment", "subtotal", "discount", "total", "paid", "change", "estimated_done", "created_at"],
+    "transaction_items": ["id", "transaction_id", "service_id", "service_name", "qty", "price", "total"],
+    "expenses": ["id", "outlet_id", "category", "description", "amount", "created_by", "created_at"],
+    "status_history": ["id", "transaction_id", "status", "note", "updated_by", "updated_at"]
+  };
+
+  try {
+    for (let sheetName in sheetsConfig) {
+      let sheet = db.getSheetByName(sheetName);
+      if (!sheet) {
+        sheet = db.insertSheet(sheetName);
+      }
+      sheet.clearContents();
+      sheet.getRange(1, 1, 1, sheetsConfig[sheetName].length).setValues([sheetsConfig[sheetName]]);
+    }
+
+    const settingsSheet = db.getSheetByName("settings");
+    const settingsData = [
+      ["store_name", "iMersLonry"],
+      ["store_address", "Jl. Kelembutan Premium No. 123, Kota Bandung"],
+      ["store_phone", "081234567890"],
+      ["receipt_footer", "Terima kasih telah mempercayakan pakaian Anda di iMersLonry!"],
+      ["wa_provider", "none"],
+      ["wa_api_key", ""],
+      ["wa_sender", ""],
+      ["landing_status", "ON"],
+      ["brand_icon", "🧼"],
+      ["hero_headline", "Sistem POS Kasir & Portal Pelanggan Laundry"],
+      ["hero_subheadline", "Dilengkapi Notifikasi WhatsApp Gateway otomatis, sinkronisasi cloud dengan Google Sheets, dan Portal Khusus agar pelanggan bisa melacak cuciannya sendiri!"],
+      ["hero_bg_type", "gradient"],
+      ["hero_bg_color1", "#fb923c"],
+      ["hero_bg_color2", "#ea580c"],
+      ["hero_bg_color3", "#c2410c"],
+      ["hero_title_color", "#ffffff"],
+      
+      // Template Dinamis Default (INI YANG AKAN DIBACA JIKA KOTAK KOSONG)
+      ["wa_template_new", "Halo {nama_pelanggan},\nPesanan laundry Anda telah kami terima di {nama_cabang}.\n\n🧾 *Nota:* {no_nota}\n📦 *Layanan:* {nama_paket}\n💸 *Total Tagihan:* {total_tagihan}\n🎁 *Diskon:* {diskon}\n💳 *Status Bayar:* {status_bayar}\n📉 *Sisa Tagihan:* {sisa_tagihan}\n⏳ *Estimasi Selesai:* {estimasi_selesai}\n\nLacak status cucian & e-Nota Anda di sini:\n👉 {link_pelacakan}\n\nTerima kasih!"],
+      ["wa_template_status", "Update dari {nama_cabang}!\n\nHalo {nama_pelanggan},\nCucian Anda dengan nota {no_nota} saat ini berstatus: *{status_cucian}*.\n\nSisa Tagihan: {sisa_tagihan}\n\nCek e-Nota selengkapnya di sini:\n👉 {link_pelacakan}"],
+      
+      ["feat_title", "Layanan Premium Kami"], ["feat_sub", "Perawatan berkualitas tinggi untuk setiap jenis pakaian. Lembut pada bahan, tangguh pada noda."],
+      ["feat1_icon", "🧺"], ["feat1_title", "Cuci & Setrika"], ["feat1_desc", "Layanan harian standar. Dicuci bersih, dilipat rapi, dan wangi segar tahan lama."],
+      ["feat2_icon", "👔"], ["feat2_title", "Dry Cleaning"], ["feat2_desc", "Pembersihan eksklusif untuk kain mewah, jas formal, dan pakaian seremonial."],
+      ["feat3_icon", "🛏️"], ["feat3_title", "Bed Cover & Selimut"], ["feat3_desc", "Pencucian ekstraksi dalam untuk menghilangkan tungau, debu, dan kotoran membandel."],
+      ["feat4_icon", "👟"], ["feat4_title", "Spa Sepatu"], ["feat4_desc", "Perawatan bahan suede, kanvas, atau kulit. Kembalikan sepatu favorit Anda seperti baru."],
+      
+      ["ben_title", "Teknologi Sinkronisasi Multi-Outlet Instan"], ["ben_desc", "Kami mengerti tantangan mengelola banyak cabang outlet laundry. Aplikasi hadir dengan sinkronisasi awan instan langsung dari meja kasir Anda."],
+      ["ben1_title", "Sinkronisasi Spreadsheet Otomatis"], ["ben1_desc", "Terhubung langsung dengan Google Sheets sebagai database pusat, didukung LocalStorage sebagai cadangan saat internet terganggu."],
+      ["ben2_title", "Hak Akses Fleksibel Kasir & Owner"], ["ben2_desc", "Kasir hanya memproses data transaksi pada cabang tugas mereka. Owner dan Admin memiliki kendali penuh melihat seluruh laporan laba bersih."],
+      ["ben3_title", "Lacak Status via QR Code"], ["ben3_desc", "Setiap struk kasir otomatis dilengkapi QR Code unik. Pelanggan cukup memindai dengan kamera ponsel untuk mengetahui progres cucian."],
+
+      ["testi_title", "Kisah Puas Pelanggan Setia kami"],
+      ["testi1_desc", "Paling suka dengan fitur lacak status pesanan. Cukup scan QR di struk laundry dari rumah, langsung kelihatan statusnya!"], ["testi1_name", "Sarah Rahmawati"], ["testi1_role", "Ibu Rumah Tangga"],
+      ["testi2_desc", "Sangat terbantu mengelola 3 outlet laundry saya di Bandung. Dasbor kasirnya rapi, hitungan pengeluaran harian transparan."], ["testi2_name", "Bambang Susanto"], ["testi2_role", "Pemilik Multi-Outlet"],
+      ["testi3_desc", "Sistem kasirnya enteng banget dibuka di tablet maupun handphone android kasir. Struk termal yang diprint juga sangat profesional."], ["testi3_name", "Rian Mahendra"], ["testi3_role", "Kasir Laundry Utama"],
+
+      ["price_global_footer", "Ketentuan: Minimal berat pengerjaan laundry kiloan adalah 3 Kg per nota."]
+    ];
+    settingsSheet.getRange(2, 1, settingsData.length, 2).setValues(settingsData);
+
+    ui.alert("⚡ Sukses!", "Seluruh database imlaundry POS berhasil diinisialisasi ulang!", ui.ButtonSet.OK);
+  } catch (error) {
+    ui.alert("⚠️ Kesalahan!", "Gagal membuat database: " + error.toString(), ui.ButtonSet.OK);
+  }
+}
+
+// =========================================================================
+// HELPER FUNCTIONS UNTUK COPYWRITING DINAMIS
+// =========================================================================
+
+function formatRupiahServer(amount) {
+  return "Rp " + Number(amount).toLocaleString("id-ID");
+}
+
+function generateMessage(templateText, params) {
+  let msg = templateText;
+  for (let key in params) {
+    // Replace semua shortcode dengan data asli
+    let regex = new RegExp("{" + key + "}", "g");
+    msg = msg.replace(regex, params[key]);
+  }
+  return msg;
+}
+
+// =========================================================================
+// API CORE
+// =========================================================================
+
+function doGet(e) {
+  return HtmlService.createHtmlOutput("imlaundry POS GAS Production Connection Alive.");
+}
+
+function doPost(e) {
+  try {
+    const request = JSON.parse(e.postData.contents);
+    const action = e.parameter.action;
+    const db = SpreadsheetApp.getActiveSpreadsheet();
+    
+    let result = { success: false, message: "Aksi tidak dikenali" };
+    
+    if (action === "getAllData") result = getAllData(db);
+    else if (action === "backupData") result = backupSpreadsheetToDrive(db);
+    else if (action === "saveSettings") result = saveSettings(db, request);
+    else if (action === "createTransaction") result = createTransaction(db, request);
+    else if (action === "updateOrderStatus") result = updateOrderStatus(db, request);
+    else if (action === "createCustomer") result = createRow(db, "customers", request);
+    else if (action === "updateCustomer") result = updateRow(db, "customers", request);
+    else if (action === "deleteCustomer") result = deleteRow(db, "customers", request.id);
+    else if (action === "createService") result = createRow(db, "services", request);
+    else if (action === "updateService") result = updateRow(db, "services", request);
+    else if (action === "deleteService") result = deleteRow(db, "services", request.id);
+    else if (action === "createExpense") result = createRow(db, "expenses", request);
+    else if (action === "deleteExpense") result = deleteRow(db, "expenses", request.id);
+    else if (action === "createOutlet") result = handleCreateOutlet(db, request); // <-- MODIFIED ROUTING
+    else if (action === "updateOutlet") result = updateRow(db, "outlets", request);
+    else if (action === "deleteOutlet") result = deleteRow(db, "outlets", request.id);
+    else if (action === "createUser") result = createRow(db, "users", request);
+    else if (action === "updateUser") result = updateRow(db, "users", request);
+    else if (action === "deleteUser") result = deleteRow(db, "users", request.id);
+    else if (action === "changePassword") result = changePassword(db, request);
+    else if (action === "forgotPassword") result = forgotPassword(db, request);
+
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getAllData(db) {
+  const sheets = ["settings", "outlets", "users", "customers", "services", "transactions", "transaction_items", "expenses", "status_history"];
+  const data = {};
+  
+  try {
+    sheets.forEach(sheetName => {
+      const sheet = db.getSheetByName(sheetName);
+      if (sheet) {
+        const rawData = sheet.getDataRange().getValues();
+        if (rawData.length > 0) {
+          if (sheetName === "settings") {
+            data.settings = {};
+            for (let i = 1; i < rawData.length; i++) {
+              if(rawData[i][0]) data.settings[rawData[i][0]] = rawData[i][1];
+            }
+          } else {
+            const headers = rawData[0];
+            data[sheetName] = [];
+            for (let i = 1; i < rawData.length; i++) {
+              let obj = {};
+              let hasData = false;
+              for (let j = 0; j < headers.length; j++) {
+                let cellData = rawData[i][j];
+                if (cellData instanceof Date) {
+                  cellData = Utilities.formatDate(cellData, "GMT+7", "yyyy-MM-dd HH:mm:ss");
+                }
+                obj[headers[j]] = cellData;
+                if(rawData[i][j]) hasData = true;
+              }
+              if(hasData && obj.id) {
+                 data[sheetName].push(obj);
+              }
+            }
+          }
+        }
+      }
+    });
+    return { success: true, data: data };
+  } catch (error) {
+    return { success: false, error: error.toString() };
+  }
+}
+
+function changePassword(db, req) {
+  const sheetName = req.role === "Customer" ? "customers" : "users";
+  const sheet = db.getSheetByName(sheetName);
+  const data = sheet.getDataRange().getValues();
+  const pwdColIndex = req.role === "Customer" ? 3 : 3; 
+
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === req.id) {
+      sheet.getRange(i + 1, pwdColIndex + 1).setValue(req.new_password);
+      return { success: true, message: "Kata sandi berhasil diubah." };
+    }
+  }
+  return { success: false, message: "Akun tidak ditemukan." };
+}
+
+function forgotPassword(db, req) {
+  const isCustomer = req.type === "Customer";
+  const sheet = db.getSheetByName(isCustomer ? "customers" : "users");
+  const data = sheet.getDataRange().getValues();
+  const searchCol = isCustomer ? 2 : 2; 
+  const pwdCol = 3;
+  const targetId = req.identifier.trim();
+
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][searchCol].toString() === targetId) {
+      const name = data[i][1];
+      const phone = isCustomer ? data[i][2] : null; 
+      
+      if (!isCustomer && !req.phone) {
+         return { success: false, message: "Karyawan harap hubungi Owner untuk mereset sandi." };
+      }
+
+      const targetPhone = isCustomer ? phone : req.phone;
+      const newTempPassword = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      sheet.getRange(i + 1, pwdCol + 1).setValue(newTempPassword);
+
+      const msg = `Halo ${name},\nPermintaan reset kata sandi akun imlaundry Anda berhasil.\n\nKata Sandi Baru Anda: *${newTempPassword}*\n\nHarap segera login dan ganti kata sandi ini di menu Profil & Keamanan.`;
+      
+      let waRes = null;
+      try { waRes = sendWhatsApp(targetPhone, msg); } catch (err) { waRes = { error: "Fungsi sendWhatsApp gagal dipanggil." }; }
+
+      return { success: true, message: "Kata sandi baru telah dikirimkan ke WhatsApp Anda.", wa_status: waRes };
+    }
+  }
+  return { success: false, message: "Nomor HP atau Username tidak terdaftar." };
+}
+
+function backupSpreadsheetToDrive(db) {
+  try {
+    const file = DriveApp.getFileById(db.getId());
+    const folder = DriveApp.getRootFolder();
+    const backupName = "imlaundry_backup_" + Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd_HH-mm");
+    file.makeCopy(backupName, folder);
+    return { success: true, message: "Salinan cadangan database berhasil disimpan di Google Drive Utama!" };
+  } catch (e) {
+    return { success: false, error: e.toString() };
+  }
+}
+
+function saveSettings(db, settingsObj) {
+  const sheet = db.getSheetByName("settings");
+  sheet.clearContents();
+  sheet.appendRow(["key", "value"]);
+  for (let key in settingsObj) {
+    sheet.appendRow([key, settingsObj[key]]);
+  }
+  return { success: true, message: "Pengaturan & Gateway WA berhasil diperbarui." };
+}
+
+function createTransaction(db, request) {
+  const txSheet = db.getSheetByName("transactions");
+  const itemSheet = db.getSheetByName("transaction_items");
+  const histSheet = db.getSheetByName("status_history");
+  
+  const tx = request.transaction;
+  txSheet.appendRow([
+    tx.id, tx.invoice, tx.customer_id, tx.outlet_id, tx.cashier_id,
+    tx.status_order, tx.status_payment, tx.subtotal, tx.discount,
+    tx.total, tx.paid, tx.change, tx.estimated_done, tx.created_at
+  ]);
+
+  if (request.items && Array.isArray(request.items)) {
+    request.items.forEach(item => {
+      itemSheet.appendRow([
+        item.id, item.transaction_id, item.service_id, item.service_name,
+        item.qty, item.price, item.total
+      ]);
+    });
+  } else if (request.item) {
+    const item = request.item;
+    itemSheet.appendRow([
+      item.id, item.transaction_id, item.service_id, item.service_name,
+      item.qty, item.price, item.total
+    ]);
+  }
+
+  if (request.history) {
+    const h = request.history;
+    histSheet.appendRow([h.id, h.transaction_id, h.status, h.note, h.updated_by, h.updated_at]);
+  }
+
+  // --- LOGIKA TEMBAK WA & TEMPLATE DINAMIS UNTUK ORDER BARU ---
+  let waStatus = null;
+  if (request.auto_wa && tx.customer_id) {
+    const settingsSheet = db.getSheetByName("settings").getDataRange().getValues();
+    let config = {};
+    for (let i = 1; i < settingsSheet.length; i++) { config[settingsSheet[i][0]] = settingsSheet[i][1]; }
+
+    const custSheet = db.getSheetByName("customers").getDataRange().getValues();
+    let customerPhone = ""; let customerName = "";
+    for(let c = 1; c < custSheet.length; c++){
+      if(custSheet[c][0] === tx.customer_id) { customerName = custSheet[c][1]; customerPhone = custSheet[c][2]; break; }
+    }
+    
+    const outSheet = db.getSheetByName("outlets").getDataRange().getValues();
+    let outletName = "Cabang Kami"; let outletAddress = "-"; let outletPhone = "-";
+    for(let o = 1; o < outSheet.length; o++){
+      if(outSheet[o][0] === tx.outlet_id) { outletName = outSheet[o][1]; outletAddress = outSheet[o][2]; outletPhone = outSheet[o][3]; break; }
+    }
+
+    if (customerPhone) {
+      let totalAkhir = Number(tx.total) || 0;
+      let dibayar = Number(tx.paid) || 0;
+      let diskon = Number(tx.discount) || 0;
+      let sisa = totalAkhir - dibayar;
+      if (sisa < 0) sisa = 0;
+
+      let paketNamas = [];
+      if (request.items && Array.isArray(request.items)) {
+         paketNamas = request.items.map(item => item.qty + "x " + item.service_name);
+      } else if (request.item) {
+         paketNamas.push(request.item.qty + "x " + request.item.service_name);
+      }
+
+      let linkLacak = request.tracking_url || ("Silakan hubungi kasir atau cek nota dengan Invoice: " + tx.invoice);
+
+      // MAPPING PARAMETER DINAMIS YANG AKAN DIBACA GENERATOR
+      let templateParams = {
+        nama_pelanggan: customerName,
+        no_nota: tx.invoice,
+        nama_paket: paketNamas.join(", "),
+        total_tagihan: formatRupiahServer(totalAkhir),
+        diskon: formatRupiahServer(diskon),
+        status_bayar: tx.status_payment,
+        sisa_tagihan: formatRupiahServer(sisa),
+        estimasi_selesai: tx.estimated_done,
+        status_cucian: tx.status_order,
+        link_pelacakan: linkLacak,
+        nama_cabang: outletName,
+        alamat_cabang: outletAddress,
+        telepon_cabang: outletPhone
+      };
+
+      let rawTemplate = config.wa_template_new;
+      if (!rawTemplate) {
+        rawTemplate = "Halo {nama_pelanggan},\nPesanan laundry Anda telah kami terima di {nama_cabang}.\n\n🧾 *Nota:* {no_nota}\n📦 *Layanan:* {nama_paket}\n💸 *Total Tagihan:* {total_tagihan}\n🎁 *Diskon:* {diskon}\n💳 *Status:* {status_bayar}\n📉 *Sisa Tagihan:* {sisa_tagihan}\n⏳ *Estimasi Selesai:* {estimasi_selesai}\n\nLacak status cucian Anda di sini:\n👉 {link_pelacakan}\n\nTerima kasih!";
+      }
+
+      let finalMessage = generateMessage(rawTemplate, templateParams);
+      
+      try { waStatus = sendWhatsApp(customerPhone, finalMessage); } 
+      catch (err) { waStatus = { success: false, message: "Crash Panggil Fungsi: " + err.toString() }; }
+    } else {
+      waStatus = { success: false, message: "Nomor HP Pelanggan kosong di database." };
+    }
+  }
+
+  return { success: true, message: "Transaksi baru berhasil dicatat di Google Sheets.", wa_info: waStatus };
+}
+
+function updateOrderStatus(db, request) {
+  const sheet = db.getSheetByName("transactions");
+  const data = sheet.getDataRange().getValues();
+  let customerId = ""; let outletId = ""; let invoice = "";
+  let txTotal = 0; let txPaid = 0; let txDiscount = 0; let txEstDone = "";
+  
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === request.id) {
+      sheet.getRange(i + 1, 6).setValue(request.status_order);
+      sheet.getRange(i + 1, 7).setValue(request.status_payment);
+      
+      if (request.paid !== undefined) sheet.getRange(i + 1, 11).setValue(request.paid);
+      if (request.change !== undefined) sheet.getRange(i + 1, 12).setValue(request.change);
+      
+      invoice = data[i][1]; customerId = data[i][2]; outletId = data[i][3];
+      txDiscount = Number(data[i][8]) || 0; txTotal = Number(data[i][9]) || 0;
+      txPaid = request.paid !== undefined ? Number(request.paid) : (Number(data[i][10]) || 0);
+      txEstDone = data[i][12];
+      break;
+    }
+  }
+
+  const histSheet = db.getSheetByName("status_history");
+  const h = request.history;
+  histSheet.appendRow([h.id, h.transaction_id, h.status, h.note, h.updated_by, h.updated_at]);
+
+  let waStatus = null;
+  if (request.auto_wa && customerId) {
+    const settingsSheet = db.getSheetByName("settings").getDataRange().getValues();
+    let config = {};
+    for (let i = 1; i < settingsSheet.length; i++) { config[settingsSheet[i][0]] = settingsSheet[i][1]; }
+
+    const custSheet = db.getSheetByName("customers").getDataRange().getValues();
+    let customerPhone = ""; let customerName = "";
+    for(let c = 1; c < custSheet.length; c++){
+      if(custSheet[c][0] === customerId) { customerName = custSheet[c][1]; customerPhone = custSheet[c][2]; break; }
+    }
+
+    const outSheet = db.getSheetByName("outlets").getDataRange().getValues();
+    let outletName = "Cabang Kami"; let outletAddress = "-"; let outletPhone = "-";
+    for(let o = 1; o < outSheet.length; o++){
+      if(outSheet[o][0] === outletId) { outletName = outSheet[o][1]; outletAddress = outSheet[o][2]; outletPhone = outSheet[o][3]; break; }
+    }
+
+    if (customerPhone) {
+      let sisa = txTotal - txPaid;
+      if(sisa < 0) sisa = 0;
+
+      let linkLacak = request.tracking_url || ("Silakan hubungi kasir atau cek nota dengan Invoice: " + invoice);
+
+      let templateParams = {
+        nama_pelanggan: customerName,
+        no_nota: invoice,
+        nama_paket: "Cucian Anda", 
+        total_tagihan: formatRupiahServer(txTotal),
+        diskon: formatRupiahServer(txDiscount),
+        status_bayar: request.status_payment,
+        sisa_tagihan: formatRupiahServer(sisa),
+        estimasi_selesai: txEstDone,
+        status_cucian: request.status_order,
+        link_pelacakan: linkLacak,
+        nama_cabang: outletName,
+        alamat_cabang: outletAddress,
+        telepon_cabang: outletPhone
+      };
+
+      let rawTemplate = config.wa_template_status;
+      if (!rawTemplate) {
+        rawTemplate = "Update dari {nama_cabang}!\n\nHalo {nama_pelanggan},\nCucian Anda dengan nota {no_nota} saat ini berstatus: *{status_cucian}*.\n\nSisa Tagihan Pembayaran: {sisa_tagihan}\n\nCek e-Nota selengkapnya di sini:\n👉 {link_pelacakan}";
+      }
+
+      let finalMessage = generateMessage(rawTemplate, templateParams);
+      
+      try { waStatus = sendWhatsApp(customerPhone, finalMessage); } 
+      catch (err) { waStatus = { error: "Fungsi sendWhatsApp gagal: " + err.toString() }; }
+    }
+  }
+
+  return { success: true, wa_info: waStatus };
+}
+
+// FUNGSI KHUSUS UNTUK MEMBUAT CABANG DAN AUTO-COPY PAKET DARI PUSAT
+function handleCreateOutlet(db, request) {
+  // 1. Simpan Data Outlet Baru
+  const sheetName = "outlets";
+  const sheet = db.getSheetByName(sheetName);
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const newRow = headers.map(header => request[header] !== undefined ? request[header] : "");
+  sheet.appendRow(newRow);
+
+  // 2. Logika Auto-Copy / Inherit Paket Layanan dari Cabang Pusat
+  // Kita asumsikan cabang yang ada di baris ke-2 (index 1) adalah "Pusat"
+  const outData = sheet.getDataRange().getValues();
+  if (outData.length > 2) { // Minimal ada 1 cabang lain sebelum yang baru dibuat (Header + Pusat)
+    const mainOutletId = outData[1][0]; // Ambil ID cabang pusat
+    
+    const srvSheet = db.getSheetByName("services");
+    const srvData = srvSheet.getDataRange().getValues();
+    
+    if (srvData.length > 1) {
+      const srvHeaders = srvData[0];
+      const outIdIndex = srvHeaders.indexOf("outlet_id");
+      
+      let clonedCount = 0;
+      for (let i = 1; i < srvData.length; i++) {
+        // Jika paket ini milik cabang pusat, copy ke cabang baru
+        if (srvData[i][outIdIndex] === mainOutletId) {
+          let clonedRow = [];
+          for (let j = 0; j < srvHeaders.length; j++) {
+            let header = srvHeaders[j];
+            let val = srvData[i][j];
+            
+            if (header === "id") val = "SERV-" + Math.floor(10000 + Math.random() * 90000); // Generate ID baru
+            else if (header === "outlet_id") val = request.id; // Lempar ke ID Cabang Baru
+            else if (header === "created_at") val = request.created_at; // Samakan waktu rilis dengan pembuatan cabang
+            
+            clonedRow.push(val);
+          }
+          srvSheet.appendRow(clonedRow);
+          clonedCount++;
+        }
+      }
+    }
+  }
+  
+  return { success: true, message: "Cabang berhasil didirikan dan Harga Pusat otomatis disalin ke cabang ini!" };
+}
+
+function createRow(db, sheetName, rowObj) {
+  const sheet = db.getSheetByName(sheetName);
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const newRow = headers.map(header => rowObj[header] !== undefined ? rowObj[header] : "");
+  sheet.appendRow(newRow);
+  return { success: true, message: "Data berhasil ditambahkan." };
+}
+
+function updateRow(db, sheetName, rowObj) {
+  const sheet = db.getSheetByName(sheetName);
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === rowObj.id) {
+      const rowRange = sheet.getRange(i + 1, 1, 1, headers.length);
+      const updatedValues = headers.map(header => rowObj[header] !== undefined ? rowObj[header] : data[i][headers.indexOf(header)]);
+      rowRange.setValues([updatedValues]);
+      break;
+    }
+  }
+  return { success: true, message: "Data berhasil diperbarui." };
+}
+
+function deleteRow(db, sheetName, id) {
+  const sheet = db.getSheetByName(sheetName);
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === id) {
+      sheet.deleteRow(i + 1);
+      break;
+    }
+  }
+  return { success: true, message: "Data berhasil dihapus." };
+}

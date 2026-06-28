@@ -289,24 +289,31 @@
       </div>
 
       <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
-  <input type="hidden" id="login-type" value="karyawan" />
-  <div>
-    <label id="lbl-login-id" class="block text-xs font-bold text-slate-500 uppercase mb-1">Username Karyawan</label>
-    <input id="login-username" type="text" placeholder="Masukkan ID" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 font-medium" />
-  </div>
-  <div>
-    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kata Sandi</label>
-    <input id="login-password" type="password" placeholder="••••••••" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 font-medium" />
-  </div>
-  
-  <div class="flex justify-end">
-    <button type="button" onclick="openForgotPwdModal()" class="text-xs font-bold text-brand-600 hover:underline">Lupa Kata Sandi?</button>
-  </div>
+        <input type="hidden" id="login-type" value="karyawan" />
+        <div>
+          <label id="lbl-login-id" class="block text-xs font-bold text-slate-500 uppercase mb-1">Username Karyawan</label>
+          <input id="login-username" type="text" placeholder="Masukkan ID" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 font-medium" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kata Sandi</label>
+          <input id="login-password" type="password" placeholder="••••••••" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 font-medium" />
+        </div>
+        
+        <div class="flex justify-end">
+          <button type="button" onclick="openForgotPwdModal()" class="text-xs font-bold text-brand-600 hover:underline">Lupa Kata Sandi?</button>
+        </div>
 
-  <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition shadow-lg shadow-brand-500/20">
-    Masuk Sekarang
-  </button>
-</form>
+        <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition shadow-lg shadow-brand-500/20">
+          Masuk Sekarang
+        </button>
+        
+        <div id="login-hints" class="mt-4 p-3 bg-slate-50 border rounded-lg text-xs text-slate-500 space-y-1">
+          <p class="font-bold mb-1">Panduan Demo Cepat:</p>
+          <p>Owner: <span class="font-mono bg-white border px-1">owner</span> / <span class="font-mono bg-white border px-1">owner123</span></p>
+          <p>Admin: <span class="font-mono bg-white border px-1">admin</span> / <span class="font-mono bg-white border px-1">admin123</span></p>
+          <p>Kasir: <span class="font-mono bg-white border px-1">cashier</span> / <span class="font-mono bg-white border px-1">cashier123</span></p>
+        </div>
+      </form>
     </div>
   </div>
 

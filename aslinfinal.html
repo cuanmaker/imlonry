@@ -306,7 +306,13 @@
         <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition shadow-lg shadow-brand-500/20">
           Masuk Sekarang
         </button>
-                
+        
+        <div id="login-hints" class="mt-4 p-3 bg-slate-50 border rounded-lg text-xs text-slate-500 space-y-1">
+          <p class="font-bold mb-1">Panduan Demo Cepat:</p>
+          <p>Owner: <span class="font-mono bg-white border px-1">owner</span> / <span class="font-mono bg-white border px-1">owner123</span></p>
+          <p>Admin: <span class="font-mono bg-white border px-1">admin</span> / <span class="font-mono bg-white border px-1">admin123</span></p>
+          <p>Kasir: <span class="font-mono bg-white border px-1">cashier</span> / <span class="font-mono bg-white border px-1">cashier123</span></p>
+        </div>
       </form>
     </div>
   </div>
@@ -1557,10 +1563,10 @@
       if(type === 'karyawan') {
         document.getElementById("tab-btn-karyawan").className = "flex-1 py-2 text-sm font-bold rounded-md bg-white shadow text-brand-600 transition";
         document.getElementById("tab-btn-pelanggan").className = "flex-1 py-2 text-sm font-bold rounded-md text-slate-500 hover:text-slate-800 transition";
-        document.getElementById("login-title").innerText = "Akses Login";
+        document.getElementById("login-title").innerText = "Masuk Kasir Staf";
         document.getElementById("login-subtitle").innerText = "Masukkan kredensial otorisasi sistem Anda";
         document.getElementById("lbl-login-id").innerText = "Username Karir Anda";
-        document.getElementById("login-username").placeholder = "Cth: namaanda";
+        document.getElementById("login-username").placeholder = "Cth: owner / admin / cashier";
         document.getElementById("login-hints").classList.remove("hidden");
       } else {
         document.getElementById("tab-btn-pelanggan").className = "flex-1 py-2 text-sm font-bold rounded-md bg-white shadow text-brand-600 transition";
